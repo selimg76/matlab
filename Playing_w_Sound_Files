@@ -1,0 +1,63 @@
+%first let's see the properties of the recorded file:
+info = audioinfo('matlab_sound_file.m4a')
+
+%let's import the file with the audioread command: 
+[y,Fs] = audioread('matlab_sound_file.m4a');
+
+%let's see the waveform by plotting it
+plot(y);
+title('original recording');
+
+%and now let's see if we can play it properly in matlab:
+p = audioplayer(y, 48000);
+play(p)
+
+%let's drop down from 2 channels to one:
+y2 = y(:,1);
+
+%now let's trim the silent beginning and the end:
+y2_trim = y(92000:270000,1);
+%and plot it:
+figure
+plot(y2_trim);
+title('trimmed signal');
+
+%let's play it again to see whether we cropped well:
+p = audioplayer(y2_trim, 48000);
+play(p)
+
+z=y2_trim*4;  %increasing the amplitude: increasing the volume
+q = audioplayer(z, 48000);
+play(q);
+
+%what happens is we tell matlab that the sampling frequency is 40k Hz
+%instead of 48 kHz
+p2 = audioplayer(y2_trim, 40000);
+play(p2)
+%and let's try the opposite , (increase) the sampling frequency while playing the file
+q = audioplayer(y2_trim, 56000);
+play(q)
+
+%now let's reverse the timeseries and hear how that sounds:
+reverse_y2_trim = flipud (y2_trim);
+figure
+plot(reverse_y2_trim);
+title('reversed signal');
+%and play it
+q = audioplayer(reverse_y2_trim, 48000);
+play(q)
+
+%let's try to add some delay to the speech
+shifted_y2_trim  = zeros(200000,1); %create a zeros column matrix with the desired delay(200000-178001)
+shifted_y2_trim((200000-178000):end,1)=y2_trim;
+figure
+plot(shifted_y2_trim);
+title('shifted signal');
+delayed_y2_trim  = zeros(200000,1);
+delayed_y2_trim(1:178001,1) = y2_trim;
+delayed_y2_trim = delayed_y2_trim + shifted_y2_trim;
+figure
+plot(delayed_y2_trim);
+title('delayed signal');
+q = audioplayer(delayed_y2_trim, 48000);
+play(q)
